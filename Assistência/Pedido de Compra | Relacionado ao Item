@@ -1,0 +1,24 @@
+--Consulta que utiliza como parâmetro o número do item para identificar se existe alguma pedido de compra, usando como parâmetro também se a solicitação esta aberta ou fechada.
+
+SELECT
+    PC."DocNum"                  AS "N° Pedido",
+    PC."DocDate"                 AS "Data",
+    LPC."ItemCode"               AS "Código Item",
+    ITE."ItemName"               AS "Descrição Item",
+    LPC."Quantity"               AS "Quantidade",
+    LPC."OpenQty"                AS "Quantidade em Aberto",
+    CASE
+        WHEN PC."DocStatus" = 'O' THEN 'Aberto'
+        WHEN PC."DocStatus" = 'C' THEN 'Fechado'
+    END AS "Status"
+
+FROM OPOR PC
+INNER JOIN POR1 LPC
+    ON PC."DocEntry" = LPC."DocEntry"
+LEFT JOIN OITM ITE
+    ON ITE."ItemCode" = LPC."ItemCode"
+
+WHERE
+    LPC."ItemCode" = '[%0]'
+    AND PC."DocStatus" = '[%1]'
+    AND LPC."OpenQty" > 0
