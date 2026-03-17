@@ -1,3 +1,5 @@
+--Consulta puxa as notas fiscais utilizando o N° da nota como parâmetro
+
 SELECT DISTINCT 
     TNF."Serial"        AS "NF", 
     TNF."DocEntry"      AS "Acesso NF", 
