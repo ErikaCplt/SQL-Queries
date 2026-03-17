@@ -1,3 +1,5 @@
+--Consulta que puxa todas as notas fiscais de saída registradas no sistema.
+
 SELECT DISTINCT 
 	TNF."Serial" AS "NF", 
 	TNF."DocEntry" AS "Acesso NF", 
