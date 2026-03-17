@@ -1,0 +1,33 @@
+--Consulta de Nota Fiscal de Saída puxando item por item registrados na nota
+
+SELECT
+    T0."DocEntry"              AS "Acesso NF",
+    T0."Serial" AS "NF",
+    T0."DocDate"             AS "Data Emissão",
+    T0."CardCode"            AS "Código Cliente",
+    T0."CardName"            AS "Cliente",
+    CASE
+    WHEN T0."CANCELED" = 'Y' THEN 'SIM'
+    WHEN T0."CANCELED" = 'C' THEN 'NÃO'
+END AS "NF CANCELADA?",
+    CASE 
+        WHEN T0."DocStatus" = 'O' THEN 'Aberto'
+        WHEN T0."DocStatus" = 'C' THEN 'Fechado'
+    END                      AS "Status NF",
+
+    T1."ItemCode"            AS "Código Item",
+    T1."Dscription"          AS "Descrição Item",
+    T1."Quantity"            AS "Quantidade",
+    T1."Price"               AS "Preço Unitário",
+    T1."LineTotal"           AS "Total do Item",
+
+    T1."VatPrcnt"            AS "% ICMS",
+    T1."VatSum"              AS "Valor ICMS",
+    T1."TaxCode"             AS "Código Imposto",
+
+    T0."DocTotal"            AS "Total NF"
+
+FROM OINV T0
+INNER JOIN INV1 T1 ON T0."DocEntry" = T1."DocEntry"
+
+ORDER BY T0."DocNum", T1."LineNum"
