@@ -1,0 +1,26 @@
+--Consulta de Pedido de Venda, utilizando como parâmetro o status e período.
+
+SELECT
+    PDV."DocNum",
+    PDV."DocEntry",
+    PDV."DocDate",
+    PDV."DocDueDate" AS "Data de Entrega",
+    PDV."CardCode",
+    PDV."CardName",
+    CASE
+        WHEN PDV."BPLId" = 1 THEN 'MATRIZ'
+        WHEN PDV."BPLId" = 4 THEN 'FILIAL'
+    END AS "Filial",
+    VND."SlpName" AS "Vendedor",
+    CASE 
+        WHEN PDV."DocStatus" = 'O' THEN 'Aberto'
+        WHEN PDV."DocStatus" = 'C' THEN 'Fechado'
+     END AS "Status"
+
+FROM ORDR PDV
+LEFT JOIN OSLP VND 
+ON PDV."SlpCode" = VND."SlpCode"
+
+WHERE
+PDV."DocDueDate" BETWEEN [%0] AND [%1]
+AND PDV."DocStatus" = [%2]
