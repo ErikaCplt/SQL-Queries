@@ -1,3 +1,5 @@
+--Consulta que utiliza como parâmetro o número do item para identificar se existe alguma solicitação de compra, usando como parâmetro também se a solicitação esta aberta ou fechada.
+
 SELECT
     TPD."DocNum"      AS "N° Pedido",
     TPD."CardName"    AS "Cliente",
