@@ -1,0 +1,61 @@
+--Consulta de CT-e referenciando o número das notas ficais relacionado a eles, utilizando como parâmetro o número da nota fiscal de saída
+
+SELECT
+		NFE."DocEntry"      AS "Nº interno",
+		NFE."Serial"        AS "Número CT-e",
+		NFE."Model"         AS "Modelo",
+		NFE."CardCode"      AS "Código Fornecedor",
+		NFE."CardName"      AS "Fornecedor",
+		NFE."DocDate"       AS "Data Emissão",
+		NFE."TaxDate"       AS "Data Fiscal",
+		NFE."DocDueDate"    AS "Data Vencimento",
+		NFE."DocTotal"      AS "Valor Total",
+
+		CASE
+			WHEN NFE."CANCELED" = 'Y' THEN 0
+			ELSE ROUND(
+				NFE."DocTotal"
+				/ NULLIF(
+					SUM(
+						CASE
+							WHEN NFE."CANCELED" <> 'Y' THEN 1
+							ELSE 0
+						END
+					) OVER (PARTITION BY NFE."Serial"),
+					0
+				),
+				2
+			)
+		END                 AS "Valor Rateado",
+
+		CASE
+			WHEN REF."Number" IS NOT NULL
+			THEN TO_NVARCHAR(REF."Number")
+			WHEN REF."AccessKey" IS NOT NULL
+			THEN REF."AccessKey"
+		END                 AS "NF de Referência",
+
+		CASE
+			WHEN NFE."BPLId" = 1 THEN 'MATRIZ'
+			WHEN NFE."BPLId" = 4 THEN 'FILIAL'
+		END                 AS "Filial",
+
+		NFE."Comments"      AS "Observações",
+
+		CASE
+			WHEN NFE."CANCELED" = 'Y' THEN 'CANCELADO'
+			WHEN NFE."DocStatus" = 'O' THEN 'ABERTO'
+			WHEN NFE."DocStatus" = 'C' THEN 'FECHADO'
+		END                 AS "Status"
+
+	FROM OPCH NFE
+	LEFT JOIN PCH21 REF
+		   ON REF."DocEntry" = NFE."DocEntry"
+
+	WHERE NFE."ObjType" = '18'
+	AND NFE."Model"   = '45'
+             AND (        IFNULL('[%0]', '') = ''     OR REF."Number" = '[%0]')
+
+	ORDER BY
+		NFE."Serial",
+		NFE."DocDate" DESC;
