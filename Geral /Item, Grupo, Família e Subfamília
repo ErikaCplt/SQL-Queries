@@ -1,0 +1,25 @@
+--Consulta de Item puxando o Grupo, Familia e Subfamilia cadastrados
+
+SELECT 
+    T1."ItemCode" AS "Código Item",
+    T1."ItemName",
+
+    T2."ItmsGrpCod" AS "Código Grupo",
+    T2."ItmsGrpNam" AS "Descrição Grupo",
+
+    T1."U_Familia" AS "Código Família",
+    FAM."Name" AS "Descrição Família",
+
+    T1."U_Subfamilia" AS "Código Subfamília",
+    SUB."Name" AS "Descrição Subfamília"
+
+FROM OITM T1
+
+INNER JOIN OITB T2
+    ON T1."ItmsGrpCod" = T2."ItmsGrpCod"
+
+LEFT JOIN "@F_FAM" FAM
+    ON FAM."Code" = T1."U_Familia"
+
+LEFT JOIN "@F_SUBFAM" SUB
+    ON SUB."Code" = T1."U_Subfamilia"
