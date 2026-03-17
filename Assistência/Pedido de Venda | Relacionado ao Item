@@ -1,0 +1,31 @@
+SELECT
+    TPD."DocNum"      AS "N° Pedido",
+    TPD."CardName"    AS "Cliente",
+    TPD."DocDate"     AS "Data",
+
+    L."ItemCode"      AS "Código Item",
+    ITE."ItemName"    AS "Descrição Item",
+
+    L."Quantity"      AS "Quantidade Pedida",
+    L."OpenQty"       AS "Quantidade em Aberto",
+
+    CASE
+        WHEN TPD."CANCELED" = 'Y' THEN 'Cancelado'
+        WHEN TPD."DocStatus" = 'O' THEN 'Aberto'
+        WHEN TPD."DocStatus" = 'C' THEN 'Fechado'
+        ELSE 'Desconhecido'
+    END AS "Status"
+
+FROM ORDR  TPD
+INNER JOIN RDR1 L
+        ON TPD."DocEntry" = L."DocEntry"
+
+LEFT JOIN OITM ITE
+       ON ITE."ItemCode" = L."ItemCode"
+
+WHERE 
+      L."ItemCode" = '[%0]'
+      AND TPD."DocStatus" = '[%1]'
+ORDER BY
+    TPD."DocDate" DESC,
+    TPD."DocNum";
