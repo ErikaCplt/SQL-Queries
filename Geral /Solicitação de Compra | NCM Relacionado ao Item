@@ -1,0 +1,39 @@
+--Consulta de solicitação de compra que puxa o NCM cadastrado no Item
+
+SELECT
+    SPM."DocNum"        AS "Solicitação de Compra",
+    ITEM."ItemCode"     AS "Código Item",
+    ITEM."Dscription"   AS "Item",
+    ITEM."Quantity"     AS "Quantidade",
+    NCM."NcmCode"       AS "Código NCM",
+    SPM."DocDueDate"    AS "Data Vencimento",
+    SPM."ReqName"       AS "Solicitante",
+    SPM."DocTotal"      AS "Valor Documento",
+    SPM."Comments"      AS "Observações",
+    
+    CASE 
+        WHEN AUT."Status" = 'W' THEN 'Aguardando Aprovação'
+        WHEN AUT."Status" = 'Y' THEN 'Aprovado'
+        WHEN AUT."Status" = 'N' THEN 'Reprovado'
+        WHEN AUT."Status" = 'P' THEN 'Pendente'
+        WHEN AUT."Status" = 'C' THEN 'Cancelado'
+        ELSE 'Sem Processo de Aprovação'
+    END AS "Status Aprovação"
+
+FROM OPRQ SPM
+
+LEFT JOIN PRQ1 ITEM
+       ON ITEM."DocEntry" = SPM."DocEntry"
+
+LEFT JOIN OITM
+       ON OITM."ItemCode" = ITEM."ItemCode"
+
+LEFT JOIN ONCM NCM
+       ON NCM."AbsEntry" = OITM."NCMCode"
+
+LEFT JOIN OWDD AUT
+       ON AUT."DocEntry" = SPM."DocEntry"
+      AND AUT."ObjType"  = '1470000113'
+
+WHERE
+    SPM."DocStatus" = '[%0]'
