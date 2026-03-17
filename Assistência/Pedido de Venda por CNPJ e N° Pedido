@@ -1,3 +1,5 @@
+--Consulta de Pedido de Venda, utilizando CNPJ e N° Interno do Pedido como parâmetro.
+
 SELECT DISTINCT
     TPD."CardName"   AS "Cliente",
     TPD."CardCode",
