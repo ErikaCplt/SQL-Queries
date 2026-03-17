@@ -1,0 +1,26 @@
+--Consulta de estoque que puxa apenas o depósito atual dos técnicos
+
+SELECT
+    W."WhsCode"                  AS "Depósito",
+    I."ItemCode"                 AS "Código do Item",
+    I."ItemName"                 AS "Descrição do Item",
+    SUM(W."OnHand")              AS "Estoque Total"
+
+FROM OITM I
+INNER JOIN OITW W
+        ON W."ItemCode" = I."ItemCode"
+
+WHERE 
+      W."WhsCode" LIKE 'T%' 
+  AND W."WhsCode" <> 'TRANSITO'
+
+GROUP BY
+    I."ItemCode",
+    I."ItemName",
+    W."WhsCode"
+
+HAVING 
+    SUM(W."OnHand") > 0
+
+ORDER BY
+    I."ItemCode";
