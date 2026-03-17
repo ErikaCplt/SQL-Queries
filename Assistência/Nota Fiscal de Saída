@@ -1,0 +1,27 @@
+SELECT DISTINCT 
+	TNF."Serial" AS "NF", 
+	TNF."DocEntry" AS "Acesso NF", 
+                TNF."CANCELED" AS "NF Cancelada?", 
+	TPD."DocNum" AS "Pedido", 
+	TPD."DocEntry", 
+	TPD."DocDate", 
+	TPD."CardCode", 
+	TPD."CardName", 
+	TPD."NumAtCard", 
+	TPD."BPLName", 
+	OSL."SlpName"
+FROM ORDR TPD 
+LEFT JOIN RDR1 PRD 
+	ON PRD."DocEntry" = TPD."DocEntry" 
+LEFT JOIN INV1 INF 
+	ON INF."BaseEntry" = PRD."DocEntry" 
+	AND INF."BaseLine" = PRD."LineNum" 
+	AND INF."BaseType" = 17 
+LEFT JOIN OINV TNF 
+	ON TNF."DocEntry" = INF."DocEntry" 
+LEFT JOIN OSLP OSL 
+	ON OSL."SlpCode" = TPD."SlpCode" 
+WHERE
+OSL."SlpName" = 'ASSISTENCIA TECNICA'
+ORDER BY 
+	TPD."DocNum";
