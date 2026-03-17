@@ -1,0 +1,63 @@
+--Consulta de Pedido de Compra, utilizando como parâmetro o status do pedido.
+
+SELECT
+    PCM."DocNum"        AS "Pedido de Compra",
+    PCM."DocDueDate"    AS "Data Vencimento Pedido",
+    USR."U_NAME"        AS "Solicitante",
+    PCM."DocTotal"      AS "Total Pedido",
+
+    PCM."CardCode"      AS "Código Fornecedor",
+    PCM."CardName"      AS "Fornecedor",
+
+    SPM."DocNum"        AS "Solicitação de Compra",
+    SPM."DocDueDate"    AS "Data Vencimento Solicitação",
+    SPM."ReqName"       AS "Solicitante",
+    SPM."DocTotal"      AS "Total Solicitação",
+
+    CASE 
+        WHEN PCM."DocStatus" = 'O' THEN 'Aberto'
+        WHEN PCM."DocStatus" = 'C' THEN 'Fechado'
+    END AS "Status",
+
+    CASE 
+        WHEN SPM."DocEntry" IS NOT NULL THEN 'Solicitação de Compra'
+        ELSE 'Pedido de Compra'
+    END AS "Origem",
+
+    CASE 
+        WHEN SUM(P1."OpenInvQty") = SUM(P1."Quantity") THEN 'Não Atendido'
+        WHEN SUM(P1."OpenInvQty") = 0 THEN 'Atendido Total'
+        ELSE 'Atendido Parcial'
+    END AS "Status Atendimento"
+
+FROM OPOR PCM
+
+LEFT JOIN OUSR USR
+    ON PCM."ConfrmedBy" = USR."USERID"
+
+LEFT JOIN POR1 P1 
+    ON PCM."DocEntry" = P1."DocEntry"
+
+LEFT JOIN PRQ1 R1 
+    ON P1."BaseEntry" = R1."DocEntry"
+   AND P1."BaseType" = 1470000113
+
+LEFT JOIN OPRQ SPM 
+    ON R1."DocEntry" = SPM."DocEntry"
+
+WHERE
+    PCM."DocStatus" = '[%0]'
+
+GROUP BY
+    PCM."DocNum",
+    SPM."DocNum",
+    PCM."CardCode",
+    PCM."CardName",
+    PCM."DocDueDate",
+    PCM."DocTotal",
+    SPM."DocDueDate",
+    SPM."ReqName",
+    SPM."DocTotal",
+    PCM."DocStatus",
+    USR."U_NAME",
+    SPM."DocEntry"
