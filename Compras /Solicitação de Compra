@@ -1,0 +1,29 @@
+--Consulta de Solicitação de Compra, utilizando como parâmetro o status da solicitação.
+
+SELECT
+    SPM."DocNum"     AS "Solicitação de Compra",
+	ITEM."ItemCode",
+    ITEM."Dscription" as "Item",
+    SPM."DocDueDate" AS "Data Vencimento",
+    SPM."ReqName"    AS "Solicitante",
+	SPM."DocTotal"   AS "Valor",
+    SPM."Comments"   AS "Observações",
+
+    CASE 
+        WHEN AUT."Status" = 'W' THEN 'Aguardando Aprovação'
+        WHEN AUT."Status" = 'Y' THEN 'Aprovado'
+        WHEN AUT."Status" = 'N' THEN 'Reprovado'
+        WHEN AUT."Status" = 'P' THEN 'Pendente'
+        WHEN AUT."Status" = 'C' THEN 'Cancelado'
+        ELSE 'Sem Processo de Aprovação'
+    END AS "Status Aprovação"
+
+FROM OPRQ SPM
+LEFT JOIN OWDD AUT
+       ON AUT."DocEntry" = SPM."DocEntry"
+      AND AUT."ObjType"  = '1470000113'
+LEFT JOIN PRQ1 ITEM
+       ON ITEM."DocEntry" = SPM."DocEntry"
+
+WHERE
+    SPM."DocStatus" = '[%0]'
