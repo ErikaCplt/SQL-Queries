@@ -1,0 +1,59 @@
+SELECT DISTINCT
+    TPD."CardName"   AS "Cliente",
+    TPD."CardCode",
+    TPD."DocDate",
+    TPD."DocNum"     AS "Pedido",
+    TPD."NumAtCard" AS "N° Referencia",
+
+    PAR."TaxId0" AS "CNPJ",
+
+    VEN."SlpName"    AS "Vendedor",
+    TNF."Serial"     AS "NF",
+    TNF."CANCELED"   AS "NF Cancelada?",
+  
+    ATD."Status Atendimento",
+
+    CASE 
+        WHEN TPD."DocStatus" = 'O' THEN 'Aberto'
+        WHEN TPD."DocStatus" = 'C' THEN 'Fechado'
+    END AS "Status",
+
+
+    CASE 
+        WHEN TPD."CANCELED" = 'Y' THEN 'SIM'
+        WHEN TPD."CANCELED" = 'N' THEN 'NÃO'
+    END AS "Pedido Cancelado?"
+
+FROM ORDR TPD
+
+LEFT JOIN OCRD CLI
+    ON CLI."CardCode" = TPD."CardCode"
+
+LEFT JOIN OSLP VEN
+    ON TPD."SlpCode" = VEN."SlpCode"
+
+LEFT JOIN CRD7 PAR
+    ON PAR."CardCode" = TPD."CardCode"
+
+LEFT JOIN (
+    SELECT
+        "DocEntry",
+        CASE 
+            WHEN SUM("OpenInvQty") = 0 THEN 'Atendido Total'
+            ELSE 'Atendido Parcial'
+        END AS "Status Atendimento"
+    FROM RDR1
+    GROUP BY "DocEntry"
+) ATD
+    ON ATD."DocEntry" = TPD."DocEntry"
+
+LEFT JOIN INV1 I1
+    ON I1."BaseEntry" = TPD."DocEntry"
+    AND I1."BaseType" = 17
+
+LEFT JOIN OINV TNF
+    ON TNF."DocEntry" = I1."DocEntry"
+
+WHERE
+    VEN."SlpName" = 'ASSISTENCIA TECNICA'
+    AND PAR."TaxId0" LIKE '%' || [%0] || '%'
