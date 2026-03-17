@@ -1,0 +1,32 @@
+--Consulta de estoque que puxa apenas os itens que sofreram movimentação no período buscado pelo parâmetro
+
+SELECT
+    I."ItemCode" AS "Código do Item",
+    I."ItemName" AS "Descrição do Item",
+    S."EstoqueAtual" AS "Estoque Atual",
+    MAX(M."DocDate") AS "Data da Última Movimentação"
+
+FROM OINM M
+INNER JOIN OITM I
+    ON I."ItemCode" = M."ItemCode"
+
+INNER JOIN (
+    SELECT
+        W2."ItemCode",
+        SUM(W2."OnHand") AS "EstoqueAtual"
+    FROM OITW W2
+    GROUP BY
+        W2."ItemCode"
+) S
+    ON S."ItemCode" = I."ItemCode"
+
+WHERE
+    M."DocDate" BETWEEN [%0] AND [%1]
+
+GROUP BY
+    I."ItemCode",
+    I."ItemName",
+    S."EstoqueAtual"
+
+ORDER BY
+    MAX(M."DocDate") DESC;
