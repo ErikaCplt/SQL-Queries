@@ -1,0 +1,24 @@
+SELECT
+    SCM."DocNum"        AS "N° Solicitação",
+    SCM."DocDate"       AS "Data",
+    L."ItemCode"        AS "Código Item",
+    ITE."ItemName"      AS "Descrição Item",
+    L."Quantity"        AS "Quantidade Solicitada",
+    L."OpenQty"         AS "Quantidade em Aberto",
+    CASE
+        WHEN SCM."DocStatus" = 'O' THEN 'Aberto'
+        WHEN SCM."DocStatus" = 'C' THEN 'Fechado'
+    END AS "Status"
+
+FROM OPRQ SCM
+
+INNER JOIN PRQ1 L
+    ON SCM."DocEntry" = L."DocEntry"
+
+LEFT JOIN OITM ITE
+    ON ITE."ItemCode" = L."ItemCode"
+
+WHERE
+    L."ItemCode" = '[%0]'
+    AND SCM."DocStatus" = '[%1]'
+    AND L."OpenQty" > 0;
